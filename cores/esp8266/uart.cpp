@@ -511,7 +511,7 @@ uart_do_write_char(const int uart_nr, char c)
 {
     while(uart_tx_fifo_full(uart_nr))
     {
-        optimistic_yield(1000UL);
+        optimistic_yield(10000UL);
     }
 
     USF(uart_nr) = c;
