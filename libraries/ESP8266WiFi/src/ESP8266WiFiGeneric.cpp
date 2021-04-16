@@ -426,8 +426,8 @@ bool ESP8266WiFiGenericClass::mode(WiFiMode_t m, WiFiState* state) {
         return true;
     }
 
-    if (m != WIFI_OFF && !ESP.forcedModemSleep(false)) {
-        return false;
+    if (m != WIFI_OFF) {
+        ESP.forcedModemSleepOff();
     }
 
     bool ret = false;
@@ -521,7 +521,7 @@ bool ESP8266WiFiGenericClass::forceSleepBegin(uint32 sleepUs) {
         DEBUG_WIFI("core: error with mode(WIFI_OFF)\n");
         return false;
     }
-    return ESP.forcedModemSleep(true, sleepUs);
+    return ESP.forcedModemSleep(sleepUs);
 }
 
 /**
@@ -530,7 +530,8 @@ bool ESP8266WiFiGenericClass::forceSleepBegin(uint32 sleepUs) {
  */
 bool ESP8266WiFiGenericClass::forceSleepWake() {
     // restore last mode
-    if(ESP.forcedModemSleep(false) && mode(_forceSleepLastMode)) {
+    ESP.forcedModemSleepOff();
+    if(mode(_forceSleepLastMode)) {
         if((_forceSleepLastMode & WIFI_STA) != 0){
             wifi_station_connect();
         }
@@ -763,10 +764,7 @@ bool ESP8266WiFiGenericClass::shutdown (uint32 sleepUs, WiFiState* state)
 
 bool ESP8266WiFiGenericClass::resumeFromShutdown (WiFiState* state)
 {
-    if (!ESP.forcedModemSleep(false))
-    {
-        return false;
-    }
+    ESP.forcedModemSleepOff();
 
     if (!state || shutdownCRC(state) != state->crc)
     {

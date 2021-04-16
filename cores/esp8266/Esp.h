@@ -95,22 +95,24 @@ class EspClass {
         void deepSleepInstant(uint64_t time_us, RFMode mode = RF_DEFAULT);
         uint64_t deepSleepMax();
 
-        bool forcedModemSleep(bool on = true, uint32_t duration_us = 0, void (*wakeupCb)() = nullptr);
+        bool forcedModemSleep(uint32_t duration_us = 0, void (*wakeupCb)() = nullptr);
+        /// The prior sleep type is restored, but only as automatic.
+        /// If any forced sleep mode was effective before forcedModemSleep,
+        ///  it would have to be restored explicitly.
+        void forcedModemSleepOff();
 
         bool forcedLightSleepBegin(uint32_t duration_us = 0, void (*wakeupCb)() = nullptr);
         /// The prior sleep type is restored, but only as automatic.
-        /// If any forced sleep mode was effective before forcedLightSleepBegin, it must be explicitly re-entered.
+        /// If any forced sleep mode was effective before forcedLightSleepBegin,
+        ///  it would have to be restored explicitly.
         void forcedLightSleepEnd(bool cancel = false);
 
-        /// If parameter on == false, the prior sleep type is restored, but only as automatic.
-        /// If any forced sleep mode was effective before autoModemSleep,
+        void autoModemSleep();
+        void autoLightSleep();
+        /// The prior sleep type is restored, but only as automatic.
+        /// If any forced sleep mode was effective before auto{Modem,Light}Sleep,
         ///  it would have to be restored explicitly.
-        void autoModemSleep(bool on = true);
-
-        /// If parameter on == false, the prior sleep type is restored, but only as automatic.
-        /// If any forced sleep mode was effective before autoLightSleep,
-        ///  it would have to be restored explicitly.
-        void autoLightSleep(bool on = true);
+        void autoSleepOff();
 
         bool rtcUserMemoryRead(uint32_t offset, uint32_t *data, size_t size);
         bool rtcUserMemoryWrite(uint32_t offset, uint32_t *data, size_t size);
