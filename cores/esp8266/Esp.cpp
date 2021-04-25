@@ -170,9 +170,9 @@ bool EspClass::forcedModemSleep(uint32_t duration_us, fpm_wakeup_cb wakeupCb)
     }
     // SDK turns on forced modem sleep in idle task
 #ifdef HAVE_ESP_SUSPEND
-    esp_delay(1);
+    esp_delay(10);
 #else
-    delay(1);
+    delay(10);
 #endif
     return true;
 }
@@ -271,9 +271,18 @@ void EspClass::forcedLightSleepEnd(bool cancel)
         esp8266::InterruptLock lock;
         timer_list = saved_timer_list;
     }
+    saved_wakeupCb = nullptr;
     wifi_fpm_close();
     wifi_fpm_set_sleep_type(saved_sleep_type);
     saved_sleep_type = NONE_SLEEP_T;
+    if (cancel) {
+        // let the SDK catch up in idle task
+#ifdef HAVE_ESP_SUSPEND
+        esp_delay(10);
+#else
+        delay(10);
+#endif
+    }
 }
 
 void EspClass::autoModemSleep() {
