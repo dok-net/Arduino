@@ -96,7 +96,7 @@ static WVFState wvfState;
 static IRAM_ATTR void timer1Interrupt();
 static bool timerRunning = false;
 
-static __attribute__((noinline)) void initTimer() {
+static void initTimer() {
   if (!timerRunning) {
     timer1_disable();
     ETS_FRC_TIMER1_INTR_ATTACH(NULL, NULL);
@@ -168,8 +168,7 @@ static IRAM_ATTR void _notifyPWM(PWMState *p, bool idle) {
   }
 }
 
-static void _addPWMtoList(PWMState &p, int pin, uint32_t val, uint32_t range);
-
+static void _addPWMtoList(PWMState &p, uint8_t pin, uint32_t val, uint32_t range);
 
 // Called when analogWriteFreq() changed to update the PWM total period
 extern void _setPWMFreq_weak(uint32_t freq) __attribute__((weak)); 
@@ -215,7 +214,7 @@ void _setPWMFreq(uint32_t freq) {
 
 // Helper routine to remove an entry from the state machine
 // and clean up any marked-off entries
-static void _cleanAndRemovePWM(PWMState *p, int pin) {
+static void _cleanAndRemovePWM(PWMState *p, uint8_t pin) {
   uint32_t leftover = 0;
   uint32_t in, out;
   for (in = 0, out = 0; in < p->cnt; in++) {
@@ -264,7 +263,7 @@ IRAM_ATTR bool _stopPWM(uint8_t pin) {
   return _stopPWM_bound(pin);
 }
 
-static void _addPWMtoList(PWMState &p, int pin, uint32_t val, uint32_t range) {
+static void _addPWMtoList(PWMState &p, uint8_t pin, uint32_t val, uint32_t range) {
   // Stash the val and range so we can re-evaluate the fraction
   // should the user change PWM frequency.  This allows us to
   // give as great a precision as possible.  We know by construction
@@ -310,8 +309,8 @@ static void _addPWMtoList(PWMState &p, int pin, uint32_t val, uint32_t range) {
 }
 
 // Called by analogWrite(1...99%) to set the PWM duty in clock cycles
-extern bool _setPWM_weak(int pin, uint32_t val, uint32_t range) __attribute__((weak));
-bool _setPWM_weak(int pin, uint32_t val, uint32_t range) {
+extern bool _setPWM_weak(uint8_t pin, uint32_t val, uint32_t range) __attribute__((weak));
+bool _setPWM_weak(uint8_t pin, uint32_t val, uint32_t range) {
   stopWaveform(pin);
   PWMState p;  // Working copy
   p = pwmState;
@@ -341,8 +340,8 @@ bool _setPWM_weak(int pin, uint32_t val, uint32_t range) {
 
   return true;
 }
-static bool _setPWM_bound(int pin, uint32_t val, uint32_t range) __attribute__((weakref("_setPWM_weak")));
-bool _setPWM(int pin, uint32_t val, uint32_t range) {
+static bool _setPWM_bound(uint8_t pin, uint32_t val, uint32_t range) __attribute__((weakref("_setPWM_weak")));
+bool _setPWM(uint8_t pin, uint32_t val, uint32_t range) {
   return _setPWM_bound(pin, val, range);
 }
 
