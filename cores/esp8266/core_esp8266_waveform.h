@@ -58,6 +58,7 @@ extern "C" {
 // Returns true or false on success or failure.
 int startWaveform(uint8_t pin, uint32_t timeHighUS, uint32_t timeLowUS,
   uint32_t runTimeUS = 0, int8_t alignPhase = -1, uint32_t phaseOffsetUS = 0, bool autoPwm = false);
+
 // Start or change a waveform of the specified high and low CPU clock cycles on specific pin.
 // If runtimeCycles > 0 then automatically stop it after that many CPU clock cycles, relative to the next
 // full period.
@@ -68,18 +69,19 @@ int startWaveform(uint8_t pin, uint32_t timeHighUS, uint32_t timeLowUS,
 // Returns true or false on success or failure.
 int startWaveformClockCycles(uint8_t pin, uint32_t timeHighCcys, uint32_t timeLowCcys,
   uint32_t runTimeCcys = 0, int8_t alignPhase = -1, uint32_t phaseOffsetCcys = 0, bool autoPwm = false);
+
 // Stop a waveform, if any, on the specified pin.
 // Returns true or false on success or failure.
 int stopWaveform(uint8_t pin);
 
 // Add a callback function to be called on *EVERY* timer1 trigger.  The
-// callback returns the number of microseconds until the next desired call.
+// callback must return the number of CPU clock cycles until the next desired call.
 // However, since it is called every timer1 interrupt, it may be called
 // again before this period.  It should therefore use the ESP Cycle Counter
 // to determine whether or not to perform an operation.
 // Pass in NULL to disable the callback and, if no other waveforms being
 // generated, stop the timer as well.
-// Make sure the CB function has the ICACHE_RAM_ATTR decorator.
+// Make sure the CB function has the IRAM_ATTR decorator.
 void setTimer1Callback(uint32_t (*fn)());
 
 #ifdef __cplusplus

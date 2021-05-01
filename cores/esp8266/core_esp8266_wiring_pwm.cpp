@@ -26,21 +26,11 @@
 
 extern "C" {
 
-static uint32_t analogMap = 0;
 static int32_t analogScale = 255;  // Match upstream default, breaking change from 2.x.x
+
+
+static uint32_t analogMap = 0;
 static uint16_t analogFreq = 1000;
-
-extern void __analogWriteRange(uint32_t range) {
-  if ((range >= 15) && (range <= 65535)) {
-    analogScale = range;
-  }
-}
-
-extern void __analogWriteResolution(int res) {
-  if ((res >= 4) && (res <= 16)) {
-    analogScale = (1 << res) - 1;
-  }
-}
 
 extern void __analogWriteFreq(uint32_t freq) {
   if (freq < 100) {
@@ -53,6 +43,10 @@ extern void __analogWriteFreq(uint32_t freq) {
 }
 
 extern void __analogWrite(uint8_t pin, int val) {
+  analogWriteMode(pin, val, false);
+}
+
+extern void __analogWriteMode(uint8_t pin, int val, bool openDrain) {
   if (pin > 16) {
     return;
   }
@@ -71,7 +65,11 @@ extern void __analogWrite(uint8_t pin, int val) {
     analogMap &= ~(1 << pin);
   }
   else {
-    pinMode(pin, OUTPUT);
+    if(openDrain) {
+      pinMode(pin, OUTPUT_OPEN_DRAIN);
+    } else {
+      pinMode(pin, OUTPUT);
+    }
   }
   uint32_t high = (analogPeriod * val) / analogScale;
   uint32_t low = analogPeriod - high;
@@ -82,7 +80,20 @@ extern void __analogWrite(uint8_t pin, int val) {
   }
 }
 
+extern void __analogWriteRange(uint32_t range) {
+  if ((range >= 15) && (range <= 65535)) {
+    analogScale = range;
+  }
+}
+
+extern void __analogWriteResolution(int res) {
+  if ((res >= 4) && (res <= 16)) {
+    analogScale = (1 << res) - 1;
+  }
+}
+
 extern void analogWrite(uint8_t pin, int val) __attribute__((weak, alias("__analogWrite")));
+extern void analogWriteMode(uint8_t pin, int val, bool openDrain) __attribute__((weak, alias("__analogWriteMode")));
 extern void analogWriteFreq(uint32_t freq) __attribute__((weak, alias("__analogWriteFreq")));
 extern void analogWriteRange(uint32_t range) __attribute__((weak, alias("__analogWriteRange")));
 extern void analogWriteResolution(int res) __attribute__((weak, alias("__analogWriteResolution")));
