@@ -338,6 +338,18 @@ bool ESP8266WiFiGenericClass::setSleepMode(WiFiSleepType_t type, uint8_t listenI
     return ret;
 }
 
+bool ESP8266WiFiGenericClass::setSleep(bool enable) {
+    if (enable)
+    {
+        ESP.neverSleepOff();
+    }
+    else
+    {
+        ESP.neverSleep();
+    }
+    return true;
+}
+
 /**
  * get Sleep mode
  * @return sleep_type_t
